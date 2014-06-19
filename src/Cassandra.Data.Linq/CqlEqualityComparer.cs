@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Reflection;
 
@@ -11,10 +12,10 @@ namespace Cassandra.Data.Linq
 
         public bool Equals(TEntity x, TEntity y)
         {
-            List<MemberInfo> props = typeof (TEntity).GetPropertiesOrFields();
-            foreach (MemberInfo prop in props)
+            var props = typeof (TEntity).GetPropertiesOrFields();
+            foreach (PropertyDescriptor prop in props)
             {
-                var pk = prop.GetCustomAttributes(typeof (PartitionKeyAttribute), true).FirstOrDefault() as PartitionKeyAttribute;
+                var pk = prop.Attributes[typeof(PartitionKeyAttribute)] as PartitionKeyAttribute;
                 if (pk != null)
                 {
                     if (prop.GetValueFromPropertyOrField(x) == null)
@@ -26,7 +27,7 @@ namespace Cassandra.Data.Linq
                 }
                 else
                 {
-                    var rk = prop.GetCustomAttributes(typeof (ClusteringKeyAttribute), true).FirstOrDefault() as ClusteringKeyAttribute;
+                    var rk = prop.Attributes[typeof(ClusteringKeyAttribute)] as ClusteringKeyAttribute;
                     if (rk != null)
                     {
                         if (prop.GetValueFromPropertyOrField(x) == null)
@@ -44,10 +45,10 @@ namespace Cassandra.Data.Linq
         public int GetHashCode(TEntity obj)
         {
             int hashCode = 0;
-            List<MemberInfo> props = typeof (TEntity).GetPropertiesOrFields();
-            foreach (MemberInfo prop in props)
+            var props = typeof (TEntity).GetPropertiesOrFields();
+            foreach (PropertyDescriptor prop in props)
             {
-                var pk = prop.GetCustomAttributes(typeof (PartitionKeyAttribute), true).FirstOrDefault() as PartitionKeyAttribute;
+                var pk = prop.Attributes[typeof(PartitionKeyAttribute)];
                 if (pk != null)
                 {
                     if (prop.GetValueFromPropertyOrField(obj) == null)
@@ -56,7 +57,7 @@ namespace Cassandra.Data.Linq
                 }
                 else
                 {
-                    var rk = prop.GetCustomAttributes(typeof (ClusteringKeyAttribute), true).FirstOrDefault() as ClusteringKeyAttribute;
+                    var rk = prop.Attributes[typeof(ClusteringKeyAttribute)] as ClusteringKeyAttribute;
                     if (rk != null)
                     {
                         if (prop.GetValueFromPropertyOrField(obj) == null)

@@ -16,6 +16,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -94,13 +95,12 @@ namespace Cassandra.Data.Linq
         {
             if (_tableType == TableType.All)
             {
-                List<MemberInfo> props = GetEntityType().GetPropertiesOrFields();
-                foreach (MemberInfo prop in props)
+                var props = GetEntityType().GetPropertiesOrFields();
+                foreach (PropertyDescriptor prop in props)
                 {
                     Type tpy = prop.GetTypeFromPropertyOrField();
                     if (
-                        prop.GetCustomAttributes(typeof (CounterAttribute), true).FirstOrDefault() as
-                        CounterAttribute != null)
+                        prop.Attributes[typeof(CounterAttribute)] != null)
                     {
                         _tableType = TableType.Counter;
                         break;
@@ -114,7 +114,7 @@ namespace Cassandra.Data.Linq
 
         internal static string CalculateName(string tableName)
         {
-            var tableAttr = typeof (TEntity).GetCustomAttributes(typeof (TableAttribute), false).FirstOrDefault() as TableAttribute;
+            var tableAttr = TypeDescriptor.GetAttributes(typeof (TEntity))[typeof (TableAttribute)] as TableAttribute;
             if (tableAttr != null)
             {
                 if (!string.IsNullOrEmpty(tableAttr.Name))

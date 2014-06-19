@@ -207,6 +207,22 @@ APPLY BATCH".Replace("\r", ""));
         }
 
         [Test]
+        public void LinqGeneratedUpdateStatementForCounterTest()
+        {
+            var table = SessionExtensions.GetTable<CounterTestTable>(null);
+            string query;
+            string expectedQuery;
+
+            query = table
+                .Where(r => r.RowKey == 5)
+                .Select(r => new CounterTestTable() { Value = 1 })
+                .Update()
+                .ToString();
+            expectedQuery = "UPDATE \"CounterTestTable\" SET \"Value\" = \"Value\" + 1 WHERE \"RowKey\" = 5";
+            Assert.AreEqual(expectedQuery, query);
+        }
+
+        [Test]
         public void TestCqlFromLinqPaxosSupport()
         {
             var table = SessionExtensions.GetTable<TestTable>(null);
@@ -328,6 +344,20 @@ APPLY BATCH".Replace("\r", ""));
             public string ClusteringKey { get; set; }
 
             public decimal Value { get; set; }
+        }
+
+
+        [Table]
+        private class CounterTestTable
+        {
+            [PartitionKey]
+            public int RowKey { get; set; }
+
+            [ClusteringKey(1)]
+            public string ClusteringKey { get; set; }
+
+            [Counter]
+            public long Value { get; set; }
         }
 
         [Test]

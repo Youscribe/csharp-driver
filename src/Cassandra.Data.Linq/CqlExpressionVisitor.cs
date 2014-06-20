@@ -193,7 +193,7 @@ namespace Cassandra.Data.Linq
                     var val = (object) null;
                     var propsOrField = o.GetType().GetPropertiesOrFields()[mapping.Value.Item1];
                     var oriProps = type.GetPropertiesOrFields()[mapping.Value.Item1];
-                    var counter = oriProps.Attributes[typeof(CounterAttribute)] as CounterAttribute;
+                    var counter = oriProps != null ? oriProps.Attributes[typeof(CounterAttribute)] as CounterAttribute : null;
 
                     if (o.GetType().IsPrimitive || propsOrField == null)
                         val = o;

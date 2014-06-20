@@ -191,8 +191,8 @@ namespace Cassandra.Data.Linq
                 if (o != null)
                 {
                     var val = (object) null;
-                    var propsOrField = o.GetType().GetPropertiesOrFields()[mapping.Value.Item1];
-                    var oriProps = type.GetPropertiesOrFields()[mapping.Value.Item1];
+                    var propsOrField = o.GetType().GetPropertiesOrFields().FirstOrDefault(c => c.Name == mapping.Value.Item1);
+                    var oriProps = type.GetEntityProperties()[mapping.Value.Item1];
                     var counter = oriProps != null ? oriProps.Attributes[typeof(CounterAttribute)] as CounterAttribute : null;
 
                     if (o.GetType().IsPrimitive || propsOrField == null)
@@ -576,7 +576,7 @@ namespace Cassandra.Data.Linq
                 QuotedTableName = table.GetQuotedTableName();
                 AllowFiltering = table.GetEntityType().GetCustomAttributes(typeof (AllowFilteringAttribute), false).Any();
 
-                var props = table.GetEntityType().GetPropertiesOrFields();
+                var props = table.GetEntityType().GetEntityProperties();
                 foreach (PropertyDescriptor prop in props)
                 {
                     string memName = CqlQueryTools.CalculateMemberName(prop);

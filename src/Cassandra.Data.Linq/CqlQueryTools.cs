@@ -273,7 +273,7 @@ namespace Cassandra.Data.Linq
             var partitionKeys = new SortedDictionary<int, string>();
             var directives = new List<string>();
 
-            var props = table.GetEntityType().GetPropertiesOrFields();
+            var props = table.GetEntityType().GetEntityProperties();
             int curLevel = 0;
 
             if (table.GetEntityType().GetCustomAttributes(typeof (CompactStorageAttribute), false).Any())
@@ -392,11 +392,11 @@ namespace Cassandra.Data.Linq
             sb.Append(quotedtablename);
             sb.Append("(");
 
-            var props = rowType.GetPropertiesOrFields();
+            var props = rowType.GetEntityProperties();
             bool first = true;
             foreach (PropertyDescriptor prop in props)
             {
-                object val = prop.GetValueFromPropertyOrField(row);
+                object val = prop.GetValueFromPropertyDescriptor(row);
                 if (val == null) continue;
                 if (first) first = false;
                 else sb.Append(", ");
@@ -407,7 +407,7 @@ namespace Cassandra.Data.Linq
             first = true;
             foreach (PropertyDescriptor prop in props)
             {
-                object val = prop.GetValueFromPropertyOrField(row);
+                object val = prop.GetValueFromPropertyDescriptor(row);
                 if (val == null) continue;
                 if (first) first = false;
                 else sb.Append(", ");
@@ -451,7 +451,7 @@ namespace Cassandra.Data.Linq
             Type rowType = row.GetType();
             var set = new StringBuilder();
             var where = new StringBuilder();
-            var props = rowType.GetPropertiesOrFields();
+            var props = rowType.GetEntityProperties();
             bool firstSet = true;
             bool firstWhere = true;
             bool changeDetected = false;
@@ -467,8 +467,8 @@ namespace Cassandra.Data.Linq
                         var counter = prop.Attributes[typeof(CounterAttribute)] as CounterAttribute;
                         if (counter != null)
                         {
-                            long diff = (Int64) prop.GetValueFromPropertyOrField(newRow) - (Int64) prop.GetValueFromPropertyOrField(row);
-                            if (diff != 0 || (Int64) prop.GetValueFromPropertyOrField(newRow) == 0)
+                            long diff = (Int64) prop.GetValueFromPropertyDescriptor(newRow) - (Int64) prop.GetValueFromPropertyDescriptor(row);
+                            if (diff != 0 || (Int64) prop.GetValueFromPropertyDescriptor(newRow) == 0)
                             {
                                 changeDetected = true;
                                 if (firstSet) firstSet = false;
@@ -480,10 +480,10 @@ namespace Cassandra.Data.Linq
                         }
                         else
                         {
-                            object newVal = prop.GetValueFromPropertyOrField(newRow);
+                            object newVal = prop.GetValueFromPropertyDescriptor(newRow);
                             if (newVal != null)
                             {
-                                bool areDifferent = !newVal.Equals(prop.GetValueFromPropertyOrField(row));
+                                bool areDifferent = !newVal.Equals(prop.GetValueFromPropertyDescriptor(row));
                                 if (all || (areDifferent))
                                 {
                                     if (areDifferent)
@@ -507,7 +507,7 @@ namespace Cassandra.Data.Linq
                     }
                 }
 
-                object pv = prop.GetValueFromPropertyOrField(row);
+                object pv = prop.GetValueFromPropertyDescriptor(row);
                 if (pv != null)
                 {
                     if (firstWhere) firstWhere = false;
@@ -549,7 +549,7 @@ namespace Cassandra.Data.Linq
             sb.Append(quotedtablename);
             sb.Append(" WHERE ");
 
-            var props = rowType.GetPropertiesOrFields();
+            var props = rowType.GetEntityProperties();
             bool first = true;
             foreach (PropertyDescriptor prop in props)
             {
@@ -562,7 +562,7 @@ namespace Cassandra.Data.Linq
                         continue;
                     }
                 }
-                object pv = prop.GetValueFromPropertyOrField(row);
+                object pv = prop.GetValueFromPropertyDescriptor(row);
                 if (pv != null)
                 {
                     if (first) first = false;
@@ -590,7 +590,7 @@ namespace Cassandra.Data.Linq
             {
                 var row = (T) ncstr.Invoke(new object[] {});
 
-                var props = typeof(T).GetPropertiesOrFields();
+                var props = typeof(T).GetEntityProperties();
                 foreach (PropertyDescriptor prop in props)
                 {
                     int idx;
@@ -660,7 +660,7 @@ namespace Cassandra.Data.Linq
                     else
                     {
                         var objs = new object[mappings.Count];
-                        var props = typeof (T).GetPropertiesOrFields();
+                        var props = typeof(T).GetEntityProperties();
                         int idx = 0;
                         foreach (PropertyDescriptor prop in props)
                         {

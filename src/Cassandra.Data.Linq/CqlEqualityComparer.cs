@@ -12,17 +12,17 @@ namespace Cassandra.Data.Linq
 
         public bool Equals(TEntity x, TEntity y)
         {
-            var props = typeof (TEntity).GetPropertiesOrFields();
+            var props = typeof(TEntity).GetEntityProperties();
             foreach (PropertyDescriptor prop in props)
             {
                 var pk = prop.Attributes[typeof(PartitionKeyAttribute)] as PartitionKeyAttribute;
                 if (pk != null)
                 {
-                    if (prop.GetValueFromPropertyOrField(x) == null)
+                    if (prop.GetValueFromPropertyDescriptor(x) == null)
                         throw new InvalidOperationException("Partition Key is not set");
-                    if (prop.GetValueFromPropertyOrField(y) == null)
+                    if (prop.GetValueFromPropertyDescriptor(y) == null)
                         throw new InvalidOperationException("Partition Key is not set");
-                    if (!prop.GetValueFromPropertyOrField(x).Equals(prop.GetValueFromPropertyOrField(y)))
+                    if (!prop.GetValueFromPropertyDescriptor(x).Equals(prop.GetValueFromPropertyDescriptor(y)))
                         return false;
                 }
                 else
@@ -30,11 +30,11 @@ namespace Cassandra.Data.Linq
                     var rk = prop.Attributes[typeof(ClusteringKeyAttribute)] as ClusteringKeyAttribute;
                     if (rk != null)
                     {
-                        if (prop.GetValueFromPropertyOrField(x) == null)
+                        if (prop.GetValueFromPropertyDescriptor(x) == null)
                             throw new InvalidOperationException("Clustering Key is not set");
-                        if (prop.GetValueFromPropertyOrField(y) == null)
+                        if (prop.GetValueFromPropertyDescriptor(y) == null)
                             throw new InvalidOperationException("Clustering Key is not set");
-                        if (!prop.GetValueFromPropertyOrField(x).Equals(prop.GetValueFromPropertyOrField(y)))
+                        if (!prop.GetValueFromPropertyDescriptor(x).Equals(prop.GetValueFromPropertyDescriptor(y)))
                             return false;
                     }
                 }
@@ -45,24 +45,24 @@ namespace Cassandra.Data.Linq
         public int GetHashCode(TEntity obj)
         {
             int hashCode = 0;
-            var props = typeof (TEntity).GetPropertiesOrFields();
+            var props = typeof(TEntity).GetEntityProperties();
             foreach (PropertyDescriptor prop in props)
             {
                 var pk = prop.Attributes[typeof(PartitionKeyAttribute)];
                 if (pk != null)
                 {
-                    if (prop.GetValueFromPropertyOrField(obj) == null)
+                    if (prop.GetValueFromPropertyDescriptor(obj) == null)
                         throw new InvalidOperationException("Partition Key is not set");
-                    hashCode ^= prop.GetValueFromPropertyOrField(obj).GetHashCode();
+                    hashCode ^= prop.GetValueFromPropertyDescriptor(obj).GetHashCode();
                 }
                 else
                 {
                     var rk = prop.Attributes[typeof(ClusteringKeyAttribute)] as ClusteringKeyAttribute;
                     if (rk != null)
                     {
-                        if (prop.GetValueFromPropertyOrField(obj) == null)
+                        if (prop.GetValueFromPropertyDescriptor(obj) == null)
                             throw new InvalidOperationException("Clustering Key is not set");
-                        hashCode ^= prop.GetValueFromPropertyOrField(obj).GetHashCode();
+                        hashCode ^= prop.GetValueFromPropertyDescriptor(obj).GetHashCode();
                     }
                 }
             }

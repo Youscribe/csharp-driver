@@ -7,31 +7,56 @@ namespace Cassandra.Data.Linq
 {
     internal static class ReflExt
     {
-        [ThreadStatic] private static Dictionary<Type, PropertyDescriptorCollection> ReflexionCachePF;
+        [ThreadStatic] private static Dictionary<Type, PropertyDescriptorCollection> ReflexionCacheP;
+        [ThreadStatic]
+        private static Dictionary<Type, List<MemberInfo>> ReflexionCachePF;
 
-        public static PropertyDescriptorCollection GetPropertiesOrFields(this Type tpy)
+        public static PropertyDescriptorCollection GetEntityProperties(this Type tpy)
         {
-            if (ReflexionCachePF == null)
-                ReflexionCachePF = new Dictionary<Type, PropertyDescriptorCollection>();
+            if (ReflexionCacheP == null)
+                ReflexionCacheP = new Dictionary<Type, PropertyDescriptorCollection>();
 
             PropertyDescriptorCollection val;
-            if (ReflexionCachePF.TryGetValue(tpy, out val))
+            if (ReflexionCacheP.TryGetValue(tpy, out val))
                 return val;
 
-            //MemberInfo[] props = tpy.GetMembers();
-            //foreach (MemberInfo prop in props)
-            //{
-            //    if (prop is PropertyInfo || prop is FieldInfo)
-            //        ret.Add(prop);
-            //}
             var props = TypeDescriptor.GetProperties(tpy);
-            ReflexionCachePF.Add(tpy, props);
+            ReflexionCacheP.Add(tpy, props);
             return props;
         }
 
-        public static object GetValueFromPropertyOrField(this PropertyDescriptor prop, object x)
+        public static List<MemberInfo> GetPropertiesOrFields(this Type tpy)
+        {
+            if (ReflexionCachePF == null)
+                ReflexionCachePF = new Dictionary<Type, List<MemberInfo>>();
+
+            List<MemberInfo> val;
+            if (ReflexionCachePF.TryGetValue(tpy, out val))
+                return val;
+
+            val = new List<MemberInfo>();
+            MemberInfo[] props = tpy.GetMembers();
+            foreach (MemberInfo prop in props)
+            {
+                if (prop is PropertyInfo || prop is FieldInfo)
+                    val.Add(prop);
+            }
+            ReflexionCachePF.Add(tpy, val);
+            return val;
+        }
+
+        public static object GetValueFromPropertyDescriptor(this PropertyDescriptor prop, object x)
         {
             return prop.GetValue(x);
+        }
+
+        public static object GetValueFromPropertyOrField(this MemberInfo prop, object x)
+        {
+            if (prop is PropertyInfo)
+                return (prop as PropertyInfo).GetValue(x, null);
+            if (prop is FieldInfo)
+                return (prop as FieldInfo).GetValue(x);
+            return null;
         }
 
         public static Type GetTypeFromPropertyOrField(this PropertyDescriptor prop)

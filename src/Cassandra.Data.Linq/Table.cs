@@ -95,7 +95,7 @@ namespace Cassandra.Data.Linq
         {
             if (_tableType == TableType.All)
             {
-                var props = GetEntityType().GetPropertiesOrFields();
+                var props = GetEntityType().GetEntityProperties();
                 foreach (PropertyDescriptor prop in props)
                 {
                     Type tpy = prop.GetTypeFromPropertyOrField();

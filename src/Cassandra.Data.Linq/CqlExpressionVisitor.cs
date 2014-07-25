@@ -192,7 +192,7 @@ namespace Cassandra.Data.Linq
                 {
                     var val = (object) null;
                     var propsOrField = o.GetType().GetPropertiesOrFields().FirstOrDefault(c => c.Name == mapping.Value.Item1);
-                    var oriProps = type.GetEntityProperties()[mapping.Value.Item1];
+                    var oriProps = type.GetEntityProperties()[mapping.Key];
                     var counter = oriProps != null ? oriProps.Attributes[typeof(CounterAttribute)] as CounterAttribute : null;
 
                     if (o.GetType().IsPrimitive || propsOrField == null)
@@ -203,7 +203,10 @@ namespace Cassandra.Data.Linq
                     if (!Alter.ContainsKey(mapping.Key))
                         throw new CqlArgumentException("Unknown column: " + mapping.Key);
                     if (counter != null)
-                        setStatements.Add(Alter[mapping.Key].QuoteIdentifier() + " = " + Alter[mapping.Key].QuoteIdentifier() + " + " + cqlTool.AddValue(val));
+                    {
+                        if ((long)val > 0)
+                            setStatements.Add(Alter[mapping.Key].QuoteIdentifier() + " = " + Alter[mapping.Key].QuoteIdentifier() + " + " + cqlTool.AddValue(val));
+                    }
                     else
                         setStatements.Add(Alter[mapping.Key].QuoteIdentifier() + " = " + cqlTool.AddValue(val));
                 }

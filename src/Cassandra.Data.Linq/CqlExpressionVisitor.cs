@@ -203,10 +203,7 @@ namespace Cassandra.Data.Linq
                     if (!Alter.ContainsKey(mapping.Key))
                         throw new CqlArgumentException("Unknown column: " + mapping.Key);
                     if (counter != null)
-                    {
-                        if ((long)val > 0)
-                            setStatements.Add(Alter[mapping.Key].QuoteIdentifier() + " = " + Alter[mapping.Key].QuoteIdentifier() + " + " + cqlTool.AddValue(val));
-                    }
+                        setStatements.Add(Alter[mapping.Key].QuoteIdentifier() + " = " + Alter[mapping.Key].QuoteIdentifier() + " + " + cqlTool.AddValue(val));
                     else
                         setStatements.Add(Alter[mapping.Key].QuoteIdentifier() + " = " + cqlTool.AddValue(val));
                 }
